@@ -58,7 +58,7 @@ const HeaderComponent = (isHiddenSearch = false, isHiddenCart = false) => {
           <WrapperTextHeader>LAPTRINHTHATDE</WrapperTextHeader>
         </Col>
         <Col span={13}>
-          {!isHiddenSearch &&
+          {isHiddenSearch &&
             (<ButttonInputSearch
               size="large"
               bordered={false}
@@ -98,7 +98,7 @@ const HeaderComponent = (isHiddenSearch = false, isHiddenCart = false) => {
               )}
             </WrapperHeaderAccout>
           </Loading>
-          {!isHiddenCart && 
+          {isHiddenCart && 
           (<div>
             <Badge count={4} size="small">
               <ShoppingCartOutlined style={{ fontSize: '30px', color: '#fff' }} />
