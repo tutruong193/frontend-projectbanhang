@@ -45,7 +45,6 @@ const SignInPage = () => {
     dispatch(updateUser({ ...res?.data, access_token: token }))
   }
 
-  console.log('mutation', mutation)
 
   const handleNavigateSignUp = () => {
     navigate('/sign-up')
