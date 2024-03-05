@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { WrapperHeader, WrapperUploadFile } from './style'
 import { Button, Form, Modal } from 'antd'
-import { PlusOutlined, UploadOutlined } from '@ant-design/icons'
+import { PlusOutlined, DeleteOutlined ,EditOutlined  } from '@ant-design/icons'
 import TableComponent from '../TableComponent/TableComponent'
 import InputComponent from '../InputComponent/InputComponent'
 import { getBase64 } from '../../utils'
@@ -9,7 +9,9 @@ import * as ProductService from '../../services/ProductService'
 import { useMutationHooks } from '../../hooks/useMutationHook'
 import Loading from '../LoadingComponent/Loading'
 import * as message from '../../components/Message/Message'
+import { useQuery } from '@tanstack/react-query'
 const AdminProduct = () => {
+    //addproducts
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [stateProductDetails, setStateProductDetails] = useState({
         name: '',
@@ -20,6 +22,7 @@ const AdminProduct = () => {
         type: '',
         countInStock: ''
     })
+    const [form] = Form.useForm()
     const handleCancel = () => {
         setIsModalOpen(false);
         setStateProductDetails({
@@ -31,6 +34,7 @@ const AdminProduct = () => {
             type: '',
             countInStock: ''
         })
+        form.resetFields()
     };
     const onFinish = () => {
         mutation.mutate(stateProductDetails)
@@ -66,6 +70,47 @@ const AdminProduct = () => {
             image: file.preview,
         })
     }
+    ///////////////////////
+    const getAllProduct = async () => {
+        const res = await ProductService.getAllProduct()
+        return res
+    }
+    const {isLoading: isLoadingProducts, data: products} = useQuery(['products'], getAllProduct, { retry: 3, retryDelay: 1000 })
+    const renderAction = () => {
+        return (
+            <div>
+                <DeleteOutlined style={{color: 'red', fontSize:'30px', cursor: 'pointer'}}/>
+                <EditOutlined style={{color: 'orange', fontSize:'30px', cursor: 'pointer'}}/>
+            </div>
+        )
+    }
+    const columns = [
+        {
+          title: 'Name',
+          dataIndex: 'name',
+          render: (text) => <a>{text}</a>,
+        },
+        {
+          title: 'Price',
+          dataIndex: 'price',
+        },
+        {
+          title: 'Rating',
+          dataIndex: 'rating',
+        },
+        {
+          title: 'Type',
+          dataIndex: 'type',
+        },
+        {
+          title: 'Action',
+          dataIndex: 'Action',
+          render: renderAction
+        },
+      ];
+      const dataTable = products?.data?.length && products?.data?.map((product) => {
+        return { ...product, key: product._id }
+      })
     return (
         <div>
             <WrapperHeader>Quản Lý Sản Phẩm</WrapperHeader>
@@ -73,16 +118,16 @@ const AdminProduct = () => {
                 <Button style={{ height: '150px', width: '150px', borderRadius: '6px', borderStyle: 'dashed' }} onClick={() => setIsModalOpen(true)}><PlusOutlined style={{ fontSize: '60px' }} /></Button>
             </div>
             <div style={{ marginTop: '20px' }}>
-                <TableComponent />
+                <TableComponent columns={columns} isLoading={isLoadingProducts} data={dataTable}/>
             </div>
-            <Modal title="Thêm sản phẩm mới" open={isModalOpen} onCancel={handleCancel} okText=''>
+            <Modal title="Thêm sản phẩm mới" open={isModalOpen} onCancel={handleCancel} footer={null}>
                 <Loading isLoading={isLoading}>
                     <Form
                         name="basic"
-                        labelCol={{ span: 8 }}
-                        wrapperCol={{ span: 16 }}
-                        initialValues={{ remember: true }}
+                        labelCol={{ span: 6 }}
+                        wrapperCol={{ span: 18 }}
                         onFinish={onFinish}
+                        form = {form}
                         autoComplete="off">
                         <Form.Item
                             label="Name"
@@ -145,9 +190,11 @@ const AdminProduct = () => {
                                 )}
                             </WrapperUploadFile>
                         </Form.Item>
+                        <Form.Item  wrapperCol={{ offset: 20, span: 16 }}>
                         <Button type="primary" htmlType="submit">
                             Submit
                         </Button>
+                        </Form.Item>
                     </Form>
                 </Loading>
             </Modal>
