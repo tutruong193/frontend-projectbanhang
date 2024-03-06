@@ -1,5 +1,5 @@
 import axios from "axios"
-
+import Cookies from 'js-cookie';
 export const axiosJWT = axios.create()
 
 export const loginUser = async (data) => {
@@ -30,6 +30,7 @@ export const refreshToken = async () => {
 
 export const logoutUser = async () => {
     const res = await axios.post(`${process.env.REACT_APP_API_URL}/user/log-out`)
+    Cookies.remove('access_token')
     return res.data
 }
 

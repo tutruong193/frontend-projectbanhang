@@ -13,23 +13,26 @@ import Loading from '../../components/LoadingComponent/Loading'
 import jwt_decode from "jwt-decode";
 import { useDispatch } from 'react-redux'
 import { updateUser } from '../../redux/slides/userSlide'
-
+import { useCookies } from 'react-cookie'
 const SignInPage = () => {
   const [isShowPassword, setIsShowPassword] = useState(false)
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [cookiesAccessToken, setCookieAccessToken] = useCookies('')
   const dispatch = useDispatch();
 
   const navigate = useNavigate()
 
   const mutation = useMutationHooks(
-    data => UserService.loginUser(data)
+    data => UserService.loginUser(data),
+
   )
   const { data, isLoading, isSuccess } = mutation
-
   useEffect(() => {
     if (isSuccess) {
       navigate('/')
+      setCookieAccessToken('access_token', `Bearer ${data?.access_token}`, { path: '/' , encode: String })
+      console.log('cookiesAccessToken', cookiesAccessToken)
       localStorage.setItem('access_token', JSON.stringify(data?.access_token))
       if (data?.access_token) {
         const decoded = jwt_decode(data?.access_token)
