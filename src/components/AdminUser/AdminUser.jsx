@@ -315,12 +315,36 @@ const AdminUser = () => {
                 queryUser.refetch()
             }
         })
+    }////
+    ///deletemany for user
+    const mutationDeleteMany = useMutationHooks(
+        (data) => {
+            const { token, ...ids } = data
+            const res = UserService.deleteManyUser(ids, token)
+            return res
+        }
+    )
+    const handleDeleteManyUsers = (ids) => {
+        mutationDeleteMany.mutate({ ids: ids, token: user?.access_token }, {
+            onSettled: () => {
+                queryUser.refetch()
+            }
+        })
     }
+    const { data: dataDeletedMany, isLoading: isLoadingDeletedMany, isSuccess: isSuccessDeletedMany, isError: isErrorDeletedMany } = mutationDeleteMany
+    useEffect(() => {
+        if (isSuccessDeletedMany && dataDeletedMany?.status === 'OK') {
+            message.success()
+            handleCloseDrawer()
+        } else if (isErrorDeletedMany) {
+            message.error()
+        }
+    }, [isSuccessDeletedMany])
     return (
         <div>
             <WrapperHeader>Quản lý người dùng</WrapperHeader>
             <div style={{ marginTop: '20px' }}>
-                <TableComponent columns={columns} isLoading={isLoadingUsers} data={dataTable} onRow={(record, rowIndex) => {
+                <TableComponent handleDeleteMany={handleDeleteManyUsers} columns={columns} isLoading={isLoadingUsers} data={dataTable} onRow={(record, rowIndex) => {
                     return {
                         onClick: event => {
                             setRowSelected(record._id)

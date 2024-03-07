@@ -198,7 +198,7 @@ const AdminProduct = () => {
             onFilter: (value, record) => {
                 if (value === '>=') {
                     return record.price >= 50
-                } 
+                }
                 return record.price <= 50
             }
         },
@@ -213,7 +213,7 @@ const AdminProduct = () => {
             onFilter: (value, record) => {
                 if (value === '>=') {
                     return Number(record.rating) >= 3
-                } 
+                }
                 return Number(record.rating) <= 3
             }
         },
@@ -368,7 +368,31 @@ const AdminProduct = () => {
             message.error()
         }
     }, [isSuccessDeleted])
-
+    //// deleteMany
+    const mutationDeleteMany = useMutationHooks(
+        (data) => {
+            const { token, ...ids } = data
+            const res = ProductService.deleteManyProduct(ids, token)
+            return res
+        }
+    )
+    console.log('deletemany', mutationDeleteMany)
+    const handleDeleteManyProducts = (ids) => {
+        mutationDeleteMany.mutate({ ids: ids, token: user?.access_token }, {
+            onSettled: () => {
+                queryProducts.refetch()
+            }
+        })
+    }
+    const { data: dataDeletedMany, isLoading: isLoadingDeletedMany, isSuccess: isSuccessDeletedMany, isError: isErrorDeletedMany } = mutationDeleteMany
+    useEffect(() => {
+        if (isSuccessDeletedMany && dataDeletedMany?.status === 'OK') {
+            message.success()
+            handleCloseDrawer()
+        } else if (isErrorDeletedMany) {
+            message.error()
+        }
+    }, [isSuccessDeletedMany])
     return (
         <div>
             <WrapperHeader>Quản Lý Sản Phẩm</WrapperHeader>
@@ -376,7 +400,7 @@ const AdminProduct = () => {
                 <Button style={{ height: '150px', width: '150px', borderRadius: '6px', borderStyle: 'dashed' }} onClick={() => setIsModalOpen(true)}><PlusOutlined style={{ fontSize: '60px' }} /></Button>
             </div>
             <div style={{ marginTop: '20px' }}>
-                <TableComponent columns={columns} isLoading={isLoadingProducts} data={dataTable} onRow={(record, rowIndex) => {
+                <TableComponent handleDeleteMany={handleDeleteManyProducts} columns={columns} isLoading={isLoadingProducts} data={dataTable} onRow={(record, rowIndex) => {
                     return {
                         onClick: event => {
                             handleDetailsProduct(record)
