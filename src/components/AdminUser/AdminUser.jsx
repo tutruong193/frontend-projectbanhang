@@ -1,5 +1,3 @@
-
-import { PlusOutlined } from '@ant-design/icons'
 import { Button, Form, Space } from 'antd'
 import React from 'react'
 import { WrapperHeader, WrapperUploadFile } from './style'
@@ -26,18 +24,13 @@ const AdminUser = () => {
     const [isModalOpenDelete, setIsModalOpenDelete] = useState(false)
     const user = useSelector((state) => state?.user)
     const searchInput = useRef(null);
-
-    const [stateUser, setStateUser] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        isAdmin: false,
-    })
     const [stateUserDetails, setStateUserDetails] = useState({
         name: '',
         email: '',
         phone: '',
         isAdmin: false,
+        avatar: '',
+        address: ''
     })
 
     const [form] = Form.useForm();
@@ -80,6 +73,8 @@ const AdminUser = () => {
                 email: res?.data?.email,
                 phone: res?.data?.phone,
                 isAdmin: res?.data?.isAdmin,
+                address: res?.data?.address,
+                avatar: res.data?.avatar
             })
         }
         setIsLoadingUpdate(false)
@@ -211,6 +206,12 @@ const AdminUser = () => {
             ...getColumnSearchProps('email')
         },
         {
+            title: 'Address',
+            dataIndex: 'address',
+            sorter: (a, b) => a.address.length - b.address.length,
+            ...getColumnSearchProps('address')
+        },
+        {
             title: 'Admin',
             dataIndex: 'isAdmin',
             filters: [
@@ -230,6 +231,7 @@ const AdminUser = () => {
             sorter: (a, b) => a.phone - b.phone,
             ...getColumnSearchProps('phone')
         },
+
         {
             title: 'Action',
             dataIndex: 'action',
@@ -287,18 +289,6 @@ const AdminUser = () => {
             [e.target.name]: e.target.value
         })
     }
-
-    const handleOnchangeAvatar = async ({ fileList }) => {
-        const file = fileList[0]
-        if (!file.url && !file.preview) {
-            file.preview = await getBase64(file.originFileObj);
-        }
-        setStateUser({
-            ...stateUser,
-            image: file.preview
-        })
-    }
-
     const handleOnchangeAvatarDetails = async ({ fileList }) => {
         const file = fileList[0]
         if (!file.url && !file.preview) {
@@ -306,7 +296,7 @@ const AdminUser = () => {
         }
         setStateUserDetails({
             ...stateUserDetails,
-            image: file.preview
+            avatar: file.preview
         })
     }
     const onUpdateUser = () => {
@@ -315,7 +305,7 @@ const AdminUser = () => {
                 queryUser.refetch()
             }
         })
-    }////
+    }
     ///deletemany for user
     const mutationDeleteMany = useMutationHooks(
         (data) => {
@@ -354,7 +344,6 @@ const AdminUser = () => {
             </div>
             <DrawerComponent title='Chi tiết người dùng' isOpen={isOpenDrawer} onClose={() => setIsOpenDrawer(false)} width="90%">
                 <Loading isLoading={isLoadingUpdate || isLoadingUpdated}>
-
                     <Form
                         name="basic"
                         labelCol={{ span: 2 }}
@@ -381,29 +370,35 @@ const AdminUser = () => {
                         <Form.Item
                             label="Phone"
                             name="phone"
-                            rules={[{ required: true, message: 'Please input your count phone!' }]}
+                            rules={[{ required: true, message: 'Please input your phone!' }]}
                         >
                             <InputComponent value={stateUserDetails.phone} onChange={handleOnchangeDetails} name="phone" />
                         </Form.Item>
-
-                        {/* <Form.Item
-              label="Image"
-              name="image"
-              rules={[{ required: true, message: 'Please input your count image!' }]}
-            >
-              <WrapperUploadFile onChange={handleOnchangeAvatarDetails} maxCount={1}>
-                <Button >Select File</Button>
-                {stateProductDetails?.image && (
-                  <img src={stateProductDetails?.image} style={{
-                    height: '60px',
-                    width: '60px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    marginLeft: '10px'
-                  }} alt="avatar" />
-                )}
-              </WrapperUploadFile>
-            </Form.Item> */}
+                        <Form.Item
+                            label="Adress"
+                            name="address"
+                            rules={[{ required: true, message: 'Please input your  address!' }]}
+                        >
+                            <InputComponent value={stateUserDetails.address} onChange={handleOnchangeDetails} name="address" />
+                        </Form.Item>
+                        <Form.Item
+                            label="Avatar"
+                            name="avatar"
+                            rules={[{ required: true, message: 'Please input your avatar!' }]}
+                        >
+                            <WrapperUploadFile onChange={handleOnchangeAvatarDetails} maxCount={1}>
+                                <Button >Select File</Button>
+                                {stateUserDetails?.avatar && (
+                                    <img src={stateUserDetails?.avatar} style={{
+                                        height: '60px',
+                                        width: '60px',
+                                        borderRadius: '50%',
+                                        objectFit: 'cover',
+                                        marginLeft: '10px'
+                                    }} alt="avatar" />
+                                )}
+                            </WrapperUploadFile>
+                        </Form.Item>
                         <Form.Item wrapperCol={{ offset: 20, span: 16 }}>
                             <Button type="primary" htmlType="submit">
                                 Apply
